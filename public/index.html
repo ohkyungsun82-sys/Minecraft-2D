@@ -11,18 +11,19 @@ input,button{font-family:'Galmuri9';margin:5px;padding:10px;font-size:16px;}
 button{background:#5a5;color:#fff;border:2px solid #383;cursor:pointer;}
 #game{display:none;position:absolute;top:0;left:0;width:100%;height:100%;}
 canvas{display:block;}
-#chatbox{position:absolute;bottom:100px;left:20px;width:350px;height:200px;background:rgba(0,0,0,0.6);display:flex;flex-direction:column;border:2px solid #444;}
+#chatbox{position:absolute;bottom:80px;left:20px;width:350px;height:200px;background:rgba(0,0,0,0.6);display:flex;flex-direction:column;border:2px solid #444;}
 #msgs{flex:1;overflow-y:auto;padding:10px;font-size:14px;text-shadow:1px 1px 0 #000;line-height:1.5;}
 #chatinput{width:100%;box-sizing:border-box;background:rgba(0,0,0,0.8);color:#fff;border:none;padding:10px;outline:none;font-family:'Galmuri9';}
 #tab{display:none;position:absolute;top:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);padding:20px;min-width:300px;text-align:center;border:2px solid #fff;}
-#mc-ui{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;width:364px;pointer-events:none;align-items:center;}
-#bars{display:flex;justify-content:space-between;width:100%;margin-bottom:2px;padding:0 2px;}
+#mc-ui{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);width:364px;pointer-events:none;}
+#bars{display:flex;justify-content:space-between;width:100%;margin-bottom:2px;}
 .bar{display:flex;}
 .icon{width:18px;height:18px;background-size:cover;image-rendering:pixelated;}
-#hotbar{display:flex;background:url('https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19.2/assets/minecraft/textures/gui/widgets.png') 0 0;background-size:auto;width:364px;height:44px;pointer-events:auto;position:relative;image-rendering:pixelated;}
-.slot{width:36px;height:36px;margin:4px 0 0 4px;position:relative;cursor:pointer;}
-#sel-box{position:absolute;width:48px;height:48px;background:url('https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19.2/assets/minecraft/textures/gui/widgets.png') -1px -23px;background-size:auto;pointer-events:none;top:-2px;left:-2px;z-index:10;transition:left 0.1s;}
-#btn_out{position:absolute;top:20px;left:20px;padding:5px 10px;font-size:12px;background:#c22;border:2px solid #f55;color:#fff;}
+#hotbar{position:relative;width:364px;height:44px;background:url('https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19.2/assets/minecraft/textures/gui/widgets.png') 0 0 / 512px 512px;image-rendering:pixelated;pointer-events:auto;}
+#sel-box{position:absolute;top:-2px;width:48px;height:48px;background:url('https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19.2/assets/minecraft/textures/gui/widgets.png') 0 -44px / 512px 512px;image-rendering:pixelated;pointer-events:none;transition:left 0.1s;z-index:10;}
+.slot{position:absolute;top:6px;width:32px;height:32px;cursor:pointer;image-rendering:pixelated;background-size:cover;}
+.cnt{position:absolute;bottom:-4px;right:-2px;color:#fff;text-shadow:2px 2px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000;font-size:14px;font-family:'Galmuri9';pointer-events:none;}
+#btn_out{position:absolute;top:20px;left:20px;padding:5px 10px;font-size:12px;background:#c22;border:2px solid #f55;color:#fff;pointer-events:auto;}
 </style>
 </head>
 <body>

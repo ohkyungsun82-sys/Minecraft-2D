@@ -11,8 +11,8 @@ const tabUI=document.getElementById('tab');
 const pList=document.getElementById('plist');
 const hb=document.getElementById('hotbar');
 
-let uid,players={},world={},ents=[],cam={x:0,y:0},keys={},ts=50,lastPlace=0,vy=0,onG=false;
-let sel=1;
+let uid,players={},world={},ents=[],cam={x:0,y:0},keys={},ts=50,vy=0,onG=false;
+let sel=1,mx=0,my=0,isM=false,mX=-1,mY=-1,mS=0,lA=0;
 
 const bd=[
 {n:'grass',c:'#4c3'},{n:'dirt',c:'#866043'},{n:'stone',c:'#7d7d7d'},{n:'gold_ore',c:'#fcee4b'},{n:'iron_ore',c:'#898075'},{n:'oak_log',c:'#6b511f'},{n:'leaves',c:'#282'},
@@ -120,13 +120,36 @@ window.onkeyup=e=>{
     keys[e.key.toLowerCase()]=0;
     if(e.key==='Tab')tabUI.style.display='none';
 };
-cvs.onmousedown=e=>{
-    if(Date.now()-lastPlace<200||document.activeElement===chatIn)return;
-    lastPlace=Date.now();
-    let bx=Math.floor((e.clientX+cam.x)/ts);
-    let by=Math.floor((e.clientY+cam.y)/ts);
-    socket.emit('block',{x:bx,y:by,v:e.button===2?sel:0});
+
+cvs.onmousemove=e=>{
+    mx=e.clientX;
+    my=e.clientY;
+    let bx=Math.floor((mx+cam.x)/ts);
+    let by=Math.floor((my+cam.y)/ts);
+    if(isM&&(bx!==mX||by!==mY))isM=false;
 };
+cvs.onmousedown=e=>{
+    if(document.activeElement===chatIn)return;
+    let bx=Math.floor((mx+cam.x)/ts);
+    let by=Math.floor((my+cam.y)/ts);
+    if(e.button===0){
+        if(world[bx]&&world[bx][by]){
+            isM=true;
+            mX=bx;
+            mY=by;
+            mS=Date.now();
+        }
+    }else if(e.button===2){
+        if(Date.now()-lA>300){
+            if(!world[bx]||!world[bx][by]){
+                socket.emit('block',{x:bx,y:by,v:sel});
+                lA=Date.now();
+            }
+        }
+    }
+};
+cvs.onmouseup=e=>{if(e.button===0)isM=false;};
+cvs.onmouseleave=()=>isM=false;
 cvs.oncontextmenu=e=>e.preventDefault();
 
 function loop(){
@@ -164,6 +187,24 @@ function loop(){
             }
         }
     }
+    
+    if(isM){
+        let pr=(Date.now()-mS)/800;
+        if(pr>=1){
+            socket.emit('block',{x:mX,y:mY,v:0});
+            isM=false;
+            lA=Date.now();
+        }else{
+            ctx.fillStyle=`rgba(0,0,0,${pr*0.5})`;
+            ctx.fillRect(mX*ts,mY*ts,ts,ts);
+            ctx.strokeStyle='#000';
+            ctx.lineWidth=2;
+            ctx.strokeRect(mX*ts+ts/2-15,mY*ts+ts/2-3,30,6);
+            ctx.fillStyle='#0f0';
+            ctx.fillRect(mX*ts+ts/2-15,mY*ts+ts/2-3,30*pr,6);
+        }
+    }
+
     ents.forEach(e=>{
         ctx.fillStyle=e.t==='pig'?'#f8a':'#172';
         ctx.fillRect(e.x,e.y,30,30);

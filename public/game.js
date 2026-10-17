@@ -12,7 +12,8 @@ const pList=document.getElementById('plist');
 const hb=document.getElementById('hotbar');
 
 let uid,players={},world={},ents=[],cam={x:0,y:0},keys={},ts=50,vy=0,onG=false;
-let sel=1,mx=0,my=0,isM=false,mX=-1,mY=-1,mS=0,lA=0;
+let sel=0,mx=0,my=0,isM=false,mX=-1,mY=-1,mS=0,lA=0;
+let inv={},hbSlots=[];
 
 const bd=[
 {n:'grass',c:'#4c3'},{n:'dirt',c:'#866043'},{n:'stone',c:'#7d7d7d'},{n:'gold_ore',c:'#fcee4b'},{n:'iron_ore',c:'#898075'},{n:'oak_log',c:'#6b511f'},{n:'leaves',c:'#282'},
@@ -70,16 +71,25 @@ bd.forEach((b,i)=>{
 window.addEventListener('resize',()=>cvs.width=window.innerWidth,cvs.height=window.innerHeight);
 cvs.width=window.innerWidth;cvs.height=window.innerHeight;
 
-for(let i=1;i<=bd.length;i++){
-    let d=document.createElement('div');
-    d.className='slot'+(i===1?' act':'');
-    d.style.backgroundImage=`url(${texMap[i].toDataURL()})`;
-    d.style.backgroundSize='cover';
-    d.innerText=bNames[i];
-    d.onclick=()=>{sel=i;updHb();};
-    hb.appendChild(d);
+function updHb(){
+    hb.innerHTML='';
+    hbSlots=Object.keys(inv).filter(k=>inv[k]>0).map(Number);
+    if(!hbSlots.includes(sel)){
+        if(hbSlots.length>0)sel=hbSlots[0];
+        else sel=0;
+    }
+    hbSlots.forEach((id,idx)=>{
+        let d=document.createElement('div');
+        d.className='slot'+(sel===id?' act':'');
+        d.style.backgroundImage=`url(${texMap[id].toDataURL()})`;
+        d.style.backgroundSize='cover';
+        d.style.position='relative';
+        d.innerHTML=`<div style="position:absolute;top:2px;left:2px;background:rgba(0,0,0,0.7);padding:2px;border-radius:2px;font-size:10px;">${idx<9?idx+1:''}</div><div style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.7);padding:2px;border-radius:2px;font-size:12px;">${inv[id]}</div>`;
+        d.onclick=()=>{sel=id;updHb();};
+        hb.appendChild(d);
+    });
 }
-function updHb(){Array.from(hb.children).forEach((e,i)=>e.className='slot'+(sel===i+1?' act':''));}
+updHb();
 
 document.getElementById('btn_reg').onclick=()=>socket.emit('reg',{id:idIn.value,pw:pwIn.value});
 document.getElementById('btn_log').onclick=()=>socket.emit('log',{id:idIn.value,pw:pwIn.value});
@@ -114,7 +124,10 @@ window.onkeydown=e=>{
     keys[e.key.toLowerCase()]=1;
     if(e.key==='Enter'&&chatIn.value){socket.emit('chat',chatIn.value);chatIn.value='';}
     if(e.key==='Tab'){e.preventDefault();tabUI.style.display='block';pList.innerHTML=Object.keys(players).join('<br>');}
-    if(e.key>='1'&&e.key<='9'&&document.activeElement!==chatIn){sel=parseInt(e.key);updHb();}
+    if(e.key>='1'&&e.key<='9'&&document.activeElement!==chatIn){
+        let idx=parseInt(e.key)-1;
+        if(hbSlots[idx]){sel=hbSlots[idx];updHb();}
+    }
 };
 window.onkeyup=e=>{
     keys[e.key.toLowerCase()]=0;
@@ -142,8 +155,12 @@ cvs.onmousedown=e=>{
     }else if(e.button===2){
         if(Date.now()-lA>300){
             if(!world[bx]||!world[bx][by]){
-                socket.emit('block',{x:bx,y:by,v:sel});
-                lA=Date.now();
+                if(sel&&inv[sel]>0){
+                    inv[sel]--;
+                    socket.emit('block',{x:bx,y:by,v:sel});
+                    lA=Date.now();
+                    updHb();
+                }
             }
         }
     }
@@ -191,9 +208,14 @@ function loop(){
     if(isM){
         let pr=(Date.now()-mS)/800;
         if(pr>=1){
-            socket.emit('block',{x:mX,y:mY,v:0});
+            let bid=world[mX]&&world[mX][mY];
+            if(bid){
+                inv[bid]=(inv[bid]||0)+1;
+                socket.emit('block',{x:mX,y:mY,v:0});
+            }
             isM=false;
             lA=Date.now();
+            updHb();
         }else{
             ctx.fillStyle=`rgba(0,0,0,${pr*0.5})`;
             ctx.fillRect(mX*ts,mY*ts,ts,ts);

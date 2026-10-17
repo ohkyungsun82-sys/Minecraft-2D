@@ -20,13 +20,14 @@ const bd=[
 {n:'granite',c:'#9a6d55'},{n:'polished_granite',c:'#a0735a'},{n:'diorite',c:'#b4b4b9'},{n:'polished_diorite',c:'#c4c4c9'},{n:'andesite',c:'#828382'},{n:'polished_andesite',c:'#8e8e8e'},{n:'cobblestone',c:'#666666'},{n:'coarse_dirt',c:'#77553a'},{n:'podzol',c:'#5a3b1d'},{n:'cobbled_deepslate',c:'#4d4d50'},{n:'polished_deepslate',c:'#48484a'},{n:'deepslate_bricks',c:'#424244'},{n:'deepslate_tiles',c:'#38383a'},{n:'bedrock',c:'#555555'},{n:'sand',c:'#dbd3a0'},{n:'red_sand',c:'#a95821'},{n:'gravel',c:'#857f7e'},{n:'coal_ore',c:'#696969'},{n:'deepslate_coal_ore',c:'#4a4a4c'},{n:'deepslate_iron_ore',c:'#525050'},{n:'copper_ore',c:'#9b5a41'},{n:'deepslate_copper_ore',c:'#4c4442'},{n:'deepslate_gold_ore',c:'#5c5532'},{n:'redstone_ore',c:'#ff0000'},{n:'deepslate_redstone_ore',c:'#661111'},{n:'emerald_ore',c:'#17dd62'},{n:'deepslate_emerald_ore',c:'#23583a'},{n:'lapis_ore',c:'#224baa'},{n:'deepslate_lapis_ore',c:'#28375c'},{n:'diamond_ore',c:'#2cead9'},{n:'deepslate_diamond_ore',c:'#265552'},{n:'nether_gold_ore',c:'#733531'},{n:'nether_quartz_ore',c:'#7b625e'},{n:'ancient_debris',c:'#5e463f'},{n:'coal_block',c:'#111111'},{n:'raw_iron_block',c:'#ddba8e'},{n:'raw_copper_block',c:'#c8754b'},{n:'raw_gold_block',c:'#f3d23b'},{n:'iron_block',c:'#e6e6e6'},{n:'copper_block',c:'#c06b50'},{n:'gold_block',c:'#fedc3c'},{n:'diamond_block',c:'#61ffed'},{n:'netherite_block',c:'#423f40'},{n:'spruce_log',c:'#3a2510'},{n:'birch_log',c:'#dcdcdc'},{n:'jungle_log',c:'#564024'},{n:'acacia_log',c:'#695e54'},{n:'dark_oak_log',c:'#2d1c0b'},{n:'mangrove_log',c:'#4b2622'},{n:'cherry_log',c:'#301720'},{n:'oak_planks',c:'#a2834e'},{n:'spruce_planks',c:'#715535'},{n:'birch_planks',c:'#c4b079'},{n:'jungle_planks',c:'#a4764b'},{n:'acacia_planks',c:'#a85d32'},{n:'dark_oak_planks',c:'#422b15'},{n:'mangrove_planks',c:'#783830'},{n:'cherry_planks',c:'#e6aeba'},{n:'bamboo_planks',c:'#c4a747'},{n:'glass',c:'#c0d8ff'},{n:'white_wool',c:'#e9ecec'},{n:'white_concrete',c:'#cfd5d6'},{n:'white_concrete_powder',c:'#e1e3e3'},{n:'bricks',c:'#9a6659'},{n:'bookshelf',c:'#7c623b'},{n:'obsidian',c:'#15111e'},{n:'crying_obsidian',c:'#2c124c'},{n:'chest',c:'#d38d2f'},{n:'crafting_table',c:'#764528'},{n:'furnace',c:'#707070'},{n:'blast_furnace',c:'#525252'},{n:'smoker',c:'#595045'},{n:'dispenser',c:'#717171'},{n:'dropper',c:'#707070'},{n:'hopper',c:'#494949'},{n:'piston',c:'#716c54'},{n:'sticky_piston',c:'#788a53'},{n:'slime_block',c:'#73c847'},{n:'honey_block',c:'#ffb617'},{n:'redstone_block',c:'#aa0f00'},{n:'redstone_lamp',c:'#663b22'},{n:'glowstone',c:'#d1a84f'},{n:'sea_lantern',c:'#acd5ce'},{n:'shroomlight',c:'#f09565'},{n:'magma_block',c:'#8f3711'},{n:'soul_sand',c:'#544033'},{n:'soul_soil',c:'#4b392d'},{n:'netherrack',c:'#612727'},{n:'basalt',c:'#515156'},{n:'polished_basalt',c:'#5b5c5e'},{n:'smooth_basalt',c:'#47474d'},{n:'end_stone',c:'#dfdeb0'},{n:'end_stone_bricks',c:'#dad9a7'},{n:'purpur_block',c:'#a97aa9'},{n:'purpur_pillar',c:'#aba0ab'},{n:'tuff',c:'#6c6d66'},{n:'tuff_bricks',c:'#5b5b55'},{n:'calcite',c:'#e0e2df'},{n:'amethyst_block',c:'#865ebd'},{n:'packed_ice',c:'#8cbdf5'},{n:'blue_ice',c:'#74a7fc'},{n:'snow_block',c:'#f8fefd'},{n:'clay',c:'#a0a6b3'},{n:'terracotta',c:'#985e43'}
 ];
 
-const texMap={},bNames={};
+const texMap={},bNames={},colors={};
 const cdn='https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19.2/assets/minecraft/textures/';
 const nMap={'grass':'grass_block_side','leaves':'oak_leaves','chest':'barrel_side','crafting_table':'crafting_table_front','furnace':'furnace_front','blast_furnace':'blast_furnace_front','smoker':'smoker_front','dispenser':'dispenser_front','dropper':'dropper_front','hopper':'hopper_outside','piston':'piston_side','sticky_piston':'piston_top_sticky','redstone_lamp':'redstone_lamp_off','snow_block':'snow'};
 
 bd.forEach((b,i)=>{
     let id=i+1;
     bNames[id]=b.n;
+    colors[id]=b.c;
     let img=new Image();
     img.crossOrigin='Anonymous';
     img.src=cdn+'block/'+(nMap[b.n]||b.n)+'.png';
@@ -34,7 +35,7 @@ bd.forEach((b,i)=>{
 });
 
 const entImg={s:new Image(),z:new Image(),p:new Image()};
-entImg.s.crossOrigin='Anonymous';entImg.s.src=cdn+'entity/player/wide/steve.png';
+entImg.s.crossOrigin='Anonymous';entImg.s.src=cdn+'entity/steve.png';
 entImg.z.crossOrigin='Anonymous';entImg.z.src=cdn+'entity/zombie/zombie.png';
 entImg.p.crossOrigin='Anonymous';entImg.p.src=cdn+'entity/pig/pig.png';
 
@@ -51,6 +52,7 @@ function updHb(){
     hbSlots.forEach((id,idx)=>{
         let d=document.createElement('div');
         d.className='slot'+(sel===id?' act':'');
+        d.style.backgroundColor=colors[id];
         d.style.backgroundImage=`url(${texMap[id].src})`;
         d.style.backgroundSize='cover';
         d.style.imageRendering='pixelated';
@@ -141,7 +143,11 @@ cvs.onmouseleave=()=>isM=false;
 cvs.oncontextmenu=e=>e.preventDefault();
 
 function drawHumanoid(cx,img,x,y,mv,dir,isZ){
-    if(!img.complete)return;
+    if(!img.complete||img.naturalWidth===0){
+        cx.fillStyle=isZ?'#090':'#22e';
+        cx.fillRect(x,y,12,24);
+        return;
+    }
     let t=mv?Date.now()/150:0;
     let lA=mv?Math.sin(t)*0.8:0;
     let aA=mv?-Math.sin(t)*0.8:(isZ?-Math.PI/2:0);
@@ -159,7 +165,11 @@ function drawHumanoid(cx,img,x,y,mv,dir,isZ){
 }
 
 function drawPig(cx,img,x,y,mv,dir){
-    if(!img.complete)return;
+    if(!img.complete||img.naturalWidth===0){
+        cx.fillStyle='#f8a';
+        cx.fillRect(x,y,12,12);
+        return;
+    }
     let t=mv?Date.now()/100:0;
     let lA=mv?Math.sin(t)*0.8:0;
     cx.save();
@@ -207,8 +217,15 @@ function loop(){
     
     for(let x in world){
         for(let y in world[x]){
-            if(world[x][y]&&texMap[world[x][y]]){
-                ctx.drawImage(texMap[world[x][y]],x*ts,y*ts,ts,ts);
+            let bid=world[x][y];
+            if(bid){
+                let img=texMap[bid];
+                if(img&&img.complete&&img.naturalWidth>0){
+                    ctx.drawImage(img,x*ts,y*ts,ts,ts);
+                }else{
+                    ctx.fillStyle=colors[bid]||'#f0f';
+                    ctx.fillRect(x*ts,y*ts,ts,ts);
+                }
             }
         }
     }

@@ -10,10 +10,13 @@ const chatIn=document.getElementById('chatinput');
 const tabUI=document.getElementById('tab');
 const pList=document.getElementById('plist');
 const hb=document.getElementById('hotbar');
+const heartsUI=document.getElementById('hearts');
+const foodUI=document.getElementById('food');
 
 let uid,players={},world={},ents=[],cam={x:0,y:0},keys={},ts=16,vy=0,onG=false;
-let sel=0,mx=0,my=0,isM=false,mX=-1,mY=-1,mS=0,lA=0;
-let inv={},hbSlots=[];
+let mx=0,my=0,isM=false,mX=-1,mY=-1,mS=0,lA=0;
+let inv={},hbArr=[0,0,0,0,0,0,0,0,0],selIdx=0;
+const sc=3;
 
 const bd=[
 {n:'grass',c:'#4c3'},{n:'dirt',c:'#866043'},{n:'stone',c:'#7d7d7d'},{n:'gold_ore',c:'#fcee4b'},{n:'iron_ore',c:'#898075'},{n:'oak_log',c:'#6b511f'},{n:'leaves',c:'#282'},
@@ -39,28 +42,35 @@ entImg.s.crossOrigin='Anonymous';entImg.s.src=cdn+'entity/steve.png';
 entImg.z.crossOrigin='Anonymous';entImg.z.src=cdn+'entity/zombie/zombie.png';
 entImg.p.crossOrigin='Anonymous';entImg.p.src=cdn+'entity/pig/pig.png';
 
+for(let i=0;i<10;i++){
+    let h=document.createElement('div');
+    h.className='icon';
+    h.style.backgroundImage=`url('${cdn}gui/sprites/hud/heart/full.png')`;
+    heartsUI.appendChild(h);
+    let f=document.createElement('div');
+    f.className='icon';
+    f.style.backgroundImage=`url('${cdn}gui/sprites/hud/food/full.png')`;
+    foodUI.appendChild(f);
+}
+
 window.addEventListener('resize',()=>cvs.width=window.innerWidth,cvs.height=window.innerHeight);
 cvs.width=window.innerWidth;cvs.height=window.innerHeight;
 
 function updHb(){
     hb.innerHTML='';
-    hbSlots=Object.keys(inv).filter(k=>inv[k]>0).map(Number);
-    if(!hbSlots.includes(sel)){
-        if(hbSlots.length>0)sel=hbSlots[0];
-        else sel=0;
-    }
-    hbSlots.forEach((id,idx)=>{
+    for(let i=0;i<9;i++){
         let d=document.createElement('div');
-        d.className='slot'+(sel===id?' act':'');
-        d.style.backgroundColor=colors[id];
-        d.style.backgroundImage=`url(${texMap[id].src})`;
-        d.style.backgroundSize='cover';
-        d.style.imageRendering='pixelated';
-        d.style.position='relative';
-        d.innerHTML=`<div style="position:absolute;top:2px;left:2px;background:rgba(0,0,0,0.7);padding:2px;border-radius:2px;font-size:10px;">${idx<9?idx+1:''}</div><div style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.7);padding:2px;border-radius:2px;font-size:12px;">${inv[id]}</div>`;
-        d.onclick=()=>{sel=id;updHb();};
+        d.className='slot'+(selIdx===i?' act':'');
+        let bid=hbArr[i];
+        if(bid>0&&texMap[bid]){
+            d.style.backgroundImage=`url(${texMap[bid].src})`;
+            d.style.backgroundSize='cover';
+            d.style.imageRendering='pixelated';
+            d.innerHTML=`<div style="position:absolute;bottom:2px;right:2px;color:#fff;text-shadow:2px 2px 0 #000;font-size:12px;font-family:'Galmuri9';">${inv[bid]}</div>`;
+        }
+        d.onclick=()=>{selIdx=i;updHb();};
         hb.appendChild(d);
-    });
+    }
 }
 updHb();
 
@@ -98,8 +108,8 @@ window.onkeydown=e=>{
     if(e.key==='Enter'&&chatIn.value){socket.emit('chat',chatIn.value);chatIn.value='';}
     if(e.key==='Tab'){e.preventDefault();tabUI.style.display='block';pList.innerHTML=Object.keys(players).join('<br>');}
     if(e.key>='1'&&e.key<='9'&&document.activeElement!==chatIn){
-        let idx=parseInt(e.key)-1;
-        if(hbSlots[idx]){sel=hbSlots[idx];updHb();}
+        selIdx=parseInt(e.key)-1;
+        updHb();
     }
 };
 window.onkeyup=e=>{
@@ -110,14 +120,14 @@ window.onkeyup=e=>{
 cvs.onmousemove=e=>{
     mx=e.clientX;
     my=e.clientY;
-    let bx=Math.floor((mx+cam.x)/ts);
-    let by=Math.floor((my+cam.y)/ts);
+    let bx=Math.floor((mx/sc+cam.x)/ts);
+    let by=Math.floor((my/sc+cam.y)/ts);
     if(isM&&(bx!==mX||by!==mY))isM=false;
 };
 cvs.onmousedown=e=>{
     if(document.activeElement===chatIn)return;
-    let bx=Math.floor((mx+cam.x)/ts);
-    let by=Math.floor((my+cam.y)/ts);
+    let bx=Math.floor((mx/sc+cam.x)/ts);
+    let by=Math.floor((my/sc+cam.y)/ts);
     if(e.button===0){
         if(world[bx]&&world[bx][by]){
             isM=true;
@@ -128,9 +138,14 @@ cvs.onmousedown=e=>{
     }else if(e.button===2){
         if(Date.now()-lA>300){
             if(!world[bx]||!world[bx][by]){
-                if(sel&&inv[sel]>0){
-                    inv[sel]--;
-                    socket.emit('block',{x:bx,y:by,v:sel});
+                let bid=hbArr[selIdx];
+                if(bid>0&&inv[bid]>0){
+                    inv[bid]--;
+                    if(inv[bid]<=0){
+                        hbArr[selIdx]=0;
+                        delete inv[bid];
+                    }
+                    socket.emit('block',{x:bx,y:by,v:bid});
                     lA=Date.now();
                     updHb();
                 }
@@ -207,11 +222,14 @@ function loop(){
     pby=Math.floor((p.y+12)/ts);
     if(world[pbx]&&world[pbx][pby])p.x-=dx;
     socket.emit('move',{x:p.x,y:p.y});
-    cam.x=p.x-cvs.width/2;
-    cam.y=p.y-cvs.height/2;
+    
+    cam.x=p.x-(cvs.width/2)/sc;
+    cam.y=p.y-(cvs.height/2)/sc;
+    
     ctx.fillStyle='#6abdf2';
     ctx.fillRect(0,0,cvs.width,cvs.height);
     ctx.save();
+    ctx.scale(sc,sc);
     ctx.translate(-cam.x,-cam.y);
     ctx.imageSmoothingEnabled=false;
     
@@ -235,7 +253,12 @@ function loop(){
         if(pr>=1){
             let bid=world[mX]&&world[mX][mY];
             if(bid){
-                inv[bid]=(inv[bid]||0)+1;
+                if(!inv[bid])inv[bid]=0;
+                inv[bid]++;
+                if(!hbArr.includes(bid)){
+                    let emp=hbArr.indexOf(0);
+                    if(emp!==-1)hbArr[emp]=bid;
+                }
                 socket.emit('block',{x:mX,y:mY,v:0});
             }
             isM=false;
@@ -278,7 +301,7 @@ function loop(){
         drawHumanoid(ctx,entImg.s,op.x,op.y,mv,op.dir,false);
         ctx.fillStyle=u===uid?'#ff5':'#fff';
         ctx.textAlign='center';
-        ctx.font='10px Galmuri9';
+        ctx.font='8px Galmuri9';
         ctx.fillText(u,op.x+6,op.y-4);
     }
     

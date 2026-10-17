@@ -11,7 +11,7 @@ const tabUI=document.getElementById('tab');
 const pList=document.getElementById('plist');
 const hb=document.getElementById('hotbar');
 
-let uid,players={},world={},ents=[],cam={x:0,y:0},keys={},ts=50,vy=0,onG=false;
+let uid,players={},world={},ents=[],cam={x:0,y:0},keys={},ts=16,vy=0,onG=false;
 let sel=0,mx=0,my=0,isM=false,mX=-1,mY=-1,mS=0,lA=0;
 let inv={},hbSlots=[];
 
@@ -21,7 +21,7 @@ const bd=[
 ];
 
 const texMap={},bNames={};
-const cdn='https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19.2/assets/minecraft/textures/block/';
+const cdn='https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19.2/assets/minecraft/textures/';
 const nMap={'grass':'grass_block_side','leaves':'oak_leaves','chest':'barrel_side','crafting_table':'crafting_table_front','furnace':'furnace_front','blast_furnace':'blast_furnace_front','smoker':'smoker_front','dispenser':'dispenser_front','dropper':'dropper_front','hopper':'hopper_outside','piston':'piston_side','sticky_piston':'piston_top_sticky','redstone_lamp':'redstone_lamp_off','snow_block':'snow'};
 
 bd.forEach((b,i)=>{
@@ -29,9 +29,14 @@ bd.forEach((b,i)=>{
     bNames[id]=b.n;
     let img=new Image();
     img.crossOrigin='Anonymous';
-    img.src=cdn+(nMap[b.n]||b.n)+'.png';
+    img.src=cdn+'block/'+(nMap[b.n]||b.n)+'.png';
     texMap[id]=img;
 });
+
+const entImg={s:new Image(),z:new Image(),p:new Image()};
+entImg.s.crossOrigin='Anonymous';entImg.s.src=cdn+'entity/player/wide/steve.png';
+entImg.z.crossOrigin='Anonymous';entImg.z.src=cdn+'entity/zombie/zombie.png';
+entImg.p.crossOrigin='Anonymous';entImg.p.src=cdn+'entity/pig/pig.png';
 
 window.addEventListener('resize',()=>cvs.width=window.innerWidth,cvs.height=window.innerHeight);
 cvs.width=window.innerWidth;cvs.height=window.innerHeight;
@@ -135,26 +140,61 @@ cvs.onmouseup=e=>{if(e.button===0)isM=false;};
 cvs.onmouseleave=()=>isM=false;
 cvs.oncontextmenu=e=>e.preventDefault();
 
+function drawHumanoid(cx,img,x,y,mv,dir,isZ){
+    if(!img.complete)return;
+    let t=mv?Date.now()/150:0;
+    let lA=mv?Math.sin(t)*0.8:0;
+    let aA=mv?-Math.sin(t)*0.8:(isZ?-Math.PI/2:0);
+    cx.save();
+    cx.translate(x+6,y+12);
+    cx.scale(dir,1);
+    cx.scale(0.75,0.75);
+    cx.save();cx.translate(0,-4);cx.rotate(-aA);cx.drawImage(img,40,20,4,12,-2,0,4,12);cx.restore();
+    cx.save();cx.translate(0,4);cx.rotate(-lA);cx.drawImage(img,0,20,4,12,-2,0,4,12);cx.restore();
+    cx.drawImage(img,20,20,8,12,-4,-4,8,12);
+    cx.save();cx.translate(0,-4);cx.drawImage(img,0,8,8,8,-4,-8,8,8);cx.restore();
+    cx.save();cx.translate(0,4);cx.rotate(lA);cx.drawImage(img,0,20,4,12,-2,0,4,12);cx.restore();
+    cx.save();cx.translate(0,-4);cx.rotate(aA);cx.drawImage(img,40,20,4,12,-2,0,4,12);cx.restore();
+    cx.restore();
+}
+
+function drawPig(cx,img,x,y,mv,dir){
+    if(!img.complete)return;
+    let t=mv?Date.now()/100:0;
+    let lA=mv?Math.sin(t)*0.8:0;
+    cx.save();
+    cx.translate(x+6,y+6);
+    cx.scale(dir,1);
+    cx.scale(0.85,0.85);
+    cx.save();cx.translate(-6,2);cx.rotate(-lA);cx.drawImage(img,0,16,4,6,-2,0,4,6);cx.restore();
+    cx.save();cx.translate(6,2);cx.rotate(lA);cx.drawImage(img,0,16,4,6,-2,0,4,6);cx.restore();
+    cx.drawImage(img,28,16,16,8,-8,-4,16,8);
+    cx.drawImage(img,0,8,8,8,6,-8,8,8);
+    cx.save();cx.translate(-6,2);cx.rotate(lA);cx.drawImage(img,0,16,4,6,-2,0,4,6);cx.restore();
+    cx.save();cx.translate(6,2);cx.rotate(-lA);cx.drawImage(img,0,16,4,6,-2,0,4,6);cx.restore();
+    cx.restore();
+}
+
 function loop(){
     if(!players[uid])return requestAnimationFrame(loop);
     let p=players[uid];
     let dx=0;
-    if(keys['a']&&document.activeElement!==chatIn)dx=-5;
-    if(keys['d']&&document.activeElement!==chatIn)dx=5;
-    vy+=0.6;
+    if(keys['a']&&document.activeElement!==chatIn)dx=-2.5;
+    if(keys['d']&&document.activeElement!==chatIn)dx=2.5;
+    vy+=0.25;
     p.y+=vy;
-    let pbx=Math.floor((p.x+15)/ts),pby=Math.floor((p.y+30)/ts);
+    let pbx=Math.floor((p.x+6)/ts),pby=Math.floor((p.y+24)/ts);
     if(world[pbx]&&world[pbx][pby]){
-        p.y=pby*ts-30;
+        p.y=pby*ts-24;
         vy=0;
         onG=true;
     }else{
         onG=false;
     }
-    if(keys['w']&&onG&&document.activeElement!==chatIn)vy=-12;
+    if(keys['w']&&onG&&document.activeElement!==chatIn)vy=-5;
     p.x+=dx;
-    pbx=Math.floor((p.x+(dx>0?30:0))/ts);
-    pby=Math.floor((p.y+15)/ts);
+    pbx=Math.floor((p.x+(dx>0?12:0))/ts);
+    pby=Math.floor((p.y+12)/ts);
     if(world[pbx]&&world[pbx][pby])p.x-=dx;
     socket.emit('move',{x:p.x,y:p.y});
     cam.x=p.x-cvs.width/2;
@@ -164,6 +204,7 @@ function loop(){
     ctx.save();
     ctx.translate(-cam.x,-cam.y);
     ctx.imageSmoothingEnabled=false;
+    
     for(let x in world){
         for(let y in world[x]){
             if(world[x][y]&&texMap[world[x][y]]){
@@ -187,30 +228,43 @@ function loop(){
             ctx.fillStyle=`rgba(0,0,0,${pr*0.5})`;
             ctx.fillRect(mX*ts,mY*ts,ts,ts);
             ctx.strokeStyle='#000';
-            ctx.lineWidth=2;
-            ctx.strokeRect(mX*ts+ts/2-15,mY*ts+ts/2-3,30,6);
+            ctx.lineWidth=1;
+            ctx.strokeRect(mX*ts+ts/2-5,mY*ts+ts/2-1.5,10,3);
             ctx.fillStyle='#0f0';
-            ctx.fillRect(mX*ts+ts/2-15,mY*ts+ts/2-3,30*pr,6);
+            ctx.fillRect(mX*ts+ts/2-5,mY*ts+ts/2-1.5,10*pr,3);
         }
     }
 
     ents.forEach(e=>{
-        ctx.fillStyle=e.t==='pig'?'#f8a':'#172';
-        ctx.fillRect(e.x,e.y,30,30);
+        if(!e.px)e.px=e.x;
+        if(!e.dir)e.dir=1;
+        let mv=Math.abs(e.x-e.px)>0.1;
+        if(e.x>e.px)e.dir=1;
+        if(e.x<e.px)e.dir=-1;
+        e.px=e.x;
+        if(e.t==='pig')drawPig(ctx,entImg.p,e.x,e.y,mv,e.dir);
+        else drawHumanoid(ctx,entImg.z,e.x,e.y,mv,e.dir,true);
         ctx.fillStyle='#fff';
         ctx.textAlign='center';
-        ctx.font='12px Galmuri9';
-        ctx.fillText(e.t,e.x+15,e.y-10);
+        ctx.font='10px Galmuri9';
+        ctx.fillText(e.t,e.x+6,e.y-4);
     });
+
     for(let u in players){
         let op=players[u];
-        ctx.fillStyle=u===uid?'#e22':'#22e';
-        ctx.fillRect(op.x,op.y,30,30);
-        ctx.fillStyle='#fff';
+        if(!op.px)op.px=op.x;
+        if(!op.dir)op.dir=1;
+        let mv=Math.abs(op.x-op.px)>0.1;
+        if(op.x>op.px)op.dir=1;
+        if(op.x<op.px)op.dir=-1;
+        op.px=op.x;
+        drawHumanoid(ctx,entImg.s,op.x,op.y,mv,op.dir,false);
+        ctx.fillStyle=u===uid?'#ff5':'#fff';
         ctx.textAlign='center';
-        ctx.font='14px Galmuri9';
-        ctx.fillText(u,op.x+15,op.y-10);
+        ctx.font='10px Galmuri9';
+        ctx.fillText(u,op.x+6,op.y-4);
     }
+    
     ctx.restore();
     requestAnimationFrame(loop);
 }

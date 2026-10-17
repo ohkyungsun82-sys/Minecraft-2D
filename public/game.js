@@ -21,51 +21,16 @@ const bd=[
 ];
 
 const texMap={},bNames={};
-function genTex(n,c){
-    let cv=document.createElement('canvas');
-    cv.width=cv.height=50;
-    let cx=cv.getContext('2d');
-    cx.fillStyle=c;
-    cx.fillRect(0,0,50,50);
-    let d=cx.getImageData(0,0,50,50);
-    let p=d.data;
-    let hr=c.length===4?c[1]+c[1]:c.slice(1,3),hg=c.length===4?c[2]+c[2]:c.slice(3,5),hb=c.length===4?c[3]+c[3]:c.slice(5,7);
-    let bc=[parseInt(hr,16),parseInt(hg,16),parseInt(hb,16)];
-    let isO=n.includes('ore'),isL=n.includes('log')||n.includes('pillar'),isP=n.includes('plank')||n.includes('chest')||n.includes('crafting_table'),isB=n.includes('brick')||n.includes('cobble'),isG=n.includes('glass'),isV=n.includes('leaves');
-    let oc=isO?(n.includes('gold')?[255,215,0]:n.includes('iron')?[255,200,180]:n.includes('copper')?[255,120,50]:n.includes('diamond')?[0,255,255]:n.includes('emerald')?[0,255,0]:n.includes('redstone')?[255,0,0]:n.includes('lapis')?[0,0,255]:[30,30,30]):null;
-    for(let i=0;i<50;i++){
-        for(let j=0;j<50;j++){
-            let idx=(i*50+j)*4;
-            let r=Math.random();
-            if(isG){
-                if(i>4&&i<45&&j>4&&j<45)p[idx+3]=40;
-            }else if(isL){
-                let v=r*20+(j%10<2?-30:0);
-                p[idx]=Math.min(255,Math.max(0,bc[0]+v));p[idx+1]=Math.min(255,Math.max(0,bc[1]+v));p[idx+2]=Math.min(255,Math.max(0,bc[2]+v));
-            }else if(isP){
-                let v=r*15+(i%16<2?-30:0)+(j%25<2&&i%32<16?-30:0);
-                p[idx]=Math.min(255,Math.max(0,bc[0]+v));p[idx+1]=Math.min(255,Math.max(0,bc[1]+v));p[idx+2]=Math.min(255,Math.max(0,bc[2]+v));
-            }else if(isB){
-                let l=(i%12<2)||(j%25<2&&Math.floor(i/12)%2===0)||((j+12)%25<2&&Math.floor(i/12)%2===1);
-                let v=l?-40:(r*20-10);
-                p[idx]=Math.min(255,Math.max(0,bc[0]+v));p[idx+1]=Math.min(255,Math.max(0,bc[1]+v));p[idx+2]=Math.min(255,Math.max(0,bc[2]+v));
-            }else if(isV){
-                if(r<0.3)p[idx+3]=0;
-                else{p[idx]=Math.min(255,Math.max(0,bc[0]+r*40));p[idx+1]=Math.min(255,Math.max(0,bc[1]+r*40));p[idx+2]=Math.min(255,Math.max(0,bc[2]+r*40));}
-            }else{
-                let v=r*30-15;
-                p[idx]=Math.min(255,Math.max(0,bc[0]+v));p[idx+1]=Math.min(255,Math.max(0,bc[1]+v));p[idx+2]=Math.min(255,Math.max(0,bc[2]+v));
-                if(isO&&Math.random()<0.1){p[idx]=oc[0];p[idx+1]=oc[1];p[idx+2]=oc[2];}
-            }
-        }
-    }
-    cx.putImageData(d,0,0);
-    return cv;
-}
+const cdn='https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19.2/assets/minecraft/textures/block/';
+const nMap={'grass':'grass_block_side','leaves':'oak_leaves','chest':'barrel_side','crafting_table':'crafting_table_front','furnace':'furnace_front','blast_furnace':'blast_furnace_front','smoker':'smoker_front','dispenser':'dispenser_front','dropper':'dropper_front','hopper':'hopper_outside','piston':'piston_side','sticky_piston':'piston_top_sticky','redstone_lamp':'redstone_lamp_off','snow_block':'snow'};
 
 bd.forEach((b,i)=>{
-    texMap[i+1]=genTex(b.n,b.c);
-    bNames[i+1]=b.n;
+    let id=i+1;
+    bNames[id]=b.n;
+    let img=new Image();
+    img.crossOrigin='Anonymous';
+    img.src=cdn+(nMap[b.n]||b.n)+'.png';
+    texMap[id]=img;
 });
 
 window.addEventListener('resize',()=>cvs.width=window.innerWidth,cvs.height=window.innerHeight);
@@ -81,8 +46,9 @@ function updHb(){
     hbSlots.forEach((id,idx)=>{
         let d=document.createElement('div');
         d.className='slot'+(sel===id?' act':'');
-        d.style.backgroundImage=`url(${texMap[id].toDataURL()})`;
+        d.style.backgroundImage=`url(${texMap[id].src})`;
         d.style.backgroundSize='cover';
+        d.style.imageRendering='pixelated';
         d.style.position='relative';
         d.innerHTML=`<div style="position:absolute;top:2px;left:2px;background:rgba(0,0,0,0.7);padding:2px;border-radius:2px;font-size:10px;">${idx<9?idx+1:''}</div><div style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.7);padding:2px;border-radius:2px;font-size:12px;">${inv[id]}</div>`;
         d.onclick=()=>{sel=id;updHb();};
@@ -197,6 +163,7 @@ function loop(){
     ctx.fillRect(0,0,cvs.width,cvs.height);
     ctx.save();
     ctx.translate(-cam.x,-cam.y);
+    ctx.imageSmoothingEnabled=false;
     for(let x in world){
         for(let y in world[x]){
             if(world[x][y]&&texMap[world[x][y]]){

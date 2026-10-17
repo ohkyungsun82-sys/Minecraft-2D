@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Survival Web</title>
+<link href="https://fonts.googleapis.com/css2?family=Galmuri9&display=swap" rel="stylesheet">
+<style>
+body{margin:0;overflow:hidden;font-family:'Galmuri9',sans-serif;background:#000;color:#fff;}
+#ui{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;padding:30px;text-align:center;border:4px solid #555;}
+input,button{font-family:'Galmuri9';margin:5px;padding:10px;font-size:16px;}
+button{background:#5a5;color:#fff;border:2px solid #383;cursor:pointer;}
+#game{display:none;position:absolute;top:0;left:0;width:100%;height:100%;}
+canvas{display:block;}
+#chatbox{position:absolute;bottom:20px;left:20px;width:400px;height:250px;background:rgba(0,0,0,0.6);display:flex;flex-direction:column;border:2px solid #444;}
+#msgs{flex:1;overflow-y:auto;padding:10px;font-size:14px;text-shadow:1px 1px 0 #000;line-height:1.5;}
+#chatinput{width:100%;box-sizing:border-box;background:rgba(0,0,0,0.8);color:#fff;border:none;padding:10px;outline:none;}
+#hud{position:absolute;top:20px;left:20px;text-shadow:2px 2px 0 #000;font-size:18px;}
+#tab{display:none;position:absolute;top:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);padding:20px;min-width:300px;text-align:center;border:2px solid #fff;}
+.heart{color:#f55;}
+.food{color:#d95;}
+</style>
+</head>
+<body>
+<div id="ui">
+<h2>멀티 서바이벌</h2>
+<input id="id" placeholder="닉네임"><br>
+<input id="pw" type="password" placeholder="비밀번호"><br>
+<button id="btn_log">로그인</button>
+<button id="btn_reg">회원가입</button>
+</div>
+<div id="game">
+<canvas id="cvs"></canvas>
+<div id="hud">
+<span class="heart">♥</span> 체력: <span id="hp">20</span> / 20<br>
+<span class="food">🍖</span> 허기: <span id="hg">20</span> / 20<br>
+<button id="btn_out" style="margin-top:10px;padding:5px;font-size:12px;">로그아웃</button>
+</div>
+<div id="chatbox">
+<div id="msgs"></div>
+<input id="chatinput" placeholder="채팅 입력 (Enter) | Tab: 접속자 확인">
+</div>
+<div id="tab">현재 접속자 목록<hr><div id="plist"></div></div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

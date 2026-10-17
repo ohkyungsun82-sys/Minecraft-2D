@@ -29,23 +29,18 @@ const cdn='https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets
 const nMap={'grass':'grass_block_side','leaves':'oak_leaves','chest':'barrel_side','crafting_table':'crafting_table_front','furnace':'furnace_front','blast_furnace':'blast_furnace_front','smoker':'smoker_front','dispenser':'dispenser_front','dropper':'dropper_front','hopper':'hopper_outside','piston':'piston_side','sticky_piston':'piston_top_sticky','redstone_lamp':'redstone_lamp_off','snow_block':'snow'};
 
 bd.forEach((b,i)=>{
-    let id=i+1;
-    bNames[id]=b.n;
-    colors[id]=b.c;
+    let id=i+1;bNames[id]=b.n;colors[id]=b.c;
     if(b.r)reqs[id]=b.r;
-    let img=new Image();
-    img.crossOrigin='Anonymous';
+    let img=new Image();img.crossOrigin='Anonymous';
     img.src=cdn+'block/'+(nMap[b.n]||b.n)+'.png';
     texMap[id]=img;
 });
 
 const tools=[{id:201,n:'iron_pickaxe',t:'p'},{id:202,n:'iron_shovel',t:'s'},{id:203,n:'iron_sword',t:'w'}];
 tools.forEach(t=>{
-    let img=new Image();
-    img.crossOrigin='Anonymous';
+    let img=new Image();img.crossOrigin='Anonymous';
     img.src=cdn+'item/'+t.n+'.png';
-    texMap[t.id]=img;
-    reqs[t.id]=t.t;
+    texMap[t.id]=img;reqs[t.id]=t.t;
 });
 
 const entImg={s:new Image(),z:new Image(),p:new Image()};
@@ -69,19 +64,15 @@ if(savedId&&savedPw){
 }
 
 function updHb(){
-    let slots=document.querySelectorAll('.slot');
-    slots.forEach(s=>s.remove());
+    document.querySelectorAll('.slot').forEach(e=>e.remove());
     for(let i=0;i<9;i++){
         let d=document.createElement('div');
         d.className='slot';
+        d.style.left=(6+i*40)+'px';
         let bid=hbArr[i];
         if(bid>0&&texMap[bid]){
-            let s=document.createElement('div');
-            s.style.width='32px';s.style.height='32px';s.style.margin='2px';
-            s.style.backgroundImage=`url(${texMap[bid].src})`;
-            s.style.backgroundSize='cover';s.style.imageRendering='pixelated';
-            if(inv[bid]>1)s.innerHTML=`<div style="position:absolute;bottom:0px;right:2px;color:#fff;text-shadow:2px 2px 0 #000;font-size:16px;font-family:'Galmuri9';">${inv[bid]}</div>`;
-            d.appendChild(s);
+            d.style.backgroundImage=`url(${texMap[bid].src})`;
+            if(inv[bid]>1)d.innerHTML=`<div class="cnt">${inv[bid]}</div>`;
         }
         d.onclick=()=>{selIdx=i;selBox.style.left=(i*40-2)+'px';};
         hb.appendChild(d);
